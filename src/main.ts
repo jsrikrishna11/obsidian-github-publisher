@@ -8,6 +8,7 @@ import {
 	TFolder,
 	Notice,
 	normalizePath,
+	arrayBufferToBase64,
 } from "obsidian";
 import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 
@@ -280,9 +281,7 @@ export default class GitHubPublisherPlugin extends Plugin {
 					// Binary file
 					localSha = await this.gitBlobSha1(file.binary);
 					if (localSha !== remoteSha) {
-						const base64Content = this.arrayBufferToBase64(
-							file.binary,
-						);
+						const base64Content = arrayBufferToBase64(file.binary);
 						const blob = await this.octokit.rest.git.createBlob({
 							owner,
 							repo,
@@ -401,22 +400,6 @@ export default class GitHubPublisherPlugin extends Plugin {
 				);
 			}
 		}
-	}
-
-	/**
-	 * Converts an ArrayBuffer to a Base64-encoded string.
-	 *
-	 * @param buffer - The ArrayBuffer to convert.
-	 * @returns The Base64-encoded string representation of the buffer.
-	 */
-	arrayBufferToBase64(buffer: ArrayBuffer): string {
-		let binary = "";
-		const bytes = new Uint8Array(buffer);
-		const len = bytes.byteLength;
-		for (let i = 0; i < len; i++) {
-			binary += String.fromCharCode(bytes[i]);
-		}
-		return btoa(binary);
 	}
 
 	/**
